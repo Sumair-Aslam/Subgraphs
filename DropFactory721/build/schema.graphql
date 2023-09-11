@@ -1,0 +1,19 @@
+type Drop @entity {
+	id: ID!
+	cloneId: Bytes! # byte32
+	cloneAddress: Bytes! # address
+	caller: Bytes! # address
+}
+type Order @entity {
+	id: ID!
+	_dropId: Bytes! # byte32
+	_nftAddress: Bytes! # address
+	_tokenId: BigInt! # uint256
+	_price: BigInt # uint256
+	eventType: OrderEvent! # It tells the name of the event
+}
+
+enum OrderEvent {
+	OrderExecuted
+	OrderCancelled
+}

@@ -1,0 +1,30 @@
+specVersion: 0.0.4
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Contract
+    network: goerli
+    source:
+      address: "0x357Ea4Dd94bA9441c6A845618bAB5bb7Aa8c945B"
+      abi: Contract
+      startBlock: 7932652
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - AuctionDropCreated
+        - BidSubmitted
+        - BidAccepted
+      abis:
+        - name: Contract
+          file: Contract/abis/Contract.json
+      eventHandlers:
+        - event: AuctionDropCreated(indexed bytes32,indexed address,indexed address)
+          handler: handleAuctionDropCreated
+        - event: BidSubmitted(bytes32,bytes32,address,uint256,uint256)
+          handler: handleBidSubmitted
+        - event: BidAccepted(bytes32,address,uint256,bytes32)
+          handler: handleBidAccepted
+      file: Contract/Contract.wasm

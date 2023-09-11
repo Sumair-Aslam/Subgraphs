@@ -1,0 +1,37 @@
+type Clone @entity {
+	id: ID!
+	cloneId: Bytes! # uint256
+	cloneAddress: Bytes! # address
+	caller: Bytes! # address
+	collectibleCount: BigInt # number of collectibles deployed
+}
+
+type Token @entity {
+	id: ID!
+	contract: CollectibleErc1155!
+	tokenID: BigInt!
+	owners: [OwnerTokenLookup!]! @derivedFrom(field: "token")
+	mintTime: BigInt!
+	tokenURI: String!
+}
+
+type OwnerTokenLookup @entity {
+	id: ID! #User:ADdress_tokenId
+	owner: Owner!
+	token: Token!
+	contract: CollectibleErc1155!
+	quantity: BigInt!
+}
+
+type CollectibleErc1155 @entity {
+	id: ID!
+	uri: String
+	isLikelyERC1155: Boolean!
+	tokens: [Token!]! @derivedFrom(field: "contract")
+}
+
+type Owner @entity {
+	id: ID!
+	tokens: [OwnerTokenLookup!]! @derivedFrom(field: "owner")
+	numTokens: BigInt
+}

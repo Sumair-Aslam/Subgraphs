@@ -1,0 +1,27 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: ERC721
+    network: goerli
+    source:
+      address: "0xa89468f2dc966C997d9bFE974568eC9F34766211"
+      abi: ERC721
+      startBlock: 7702832
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Token
+        - Owner
+        - Contract
+        - Transfer
+      abis:
+        - name: ERC721
+          file: ./abis/ERC721.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/token.ts

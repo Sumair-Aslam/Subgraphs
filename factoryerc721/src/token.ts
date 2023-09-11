@@ -1,0 +1,134 @@
+// import { Transfer as TransferEvent } from "../generated/undefined/Token";
+// import { Token } from "../generated/schema";
+// import { Owner } from "../generated/schema";
+// import { Address, BigInt } from "@graphprotocol/graph-ts";
+
+// // export function handleBurned(event: BurnedEvent): void {
+// //     // let token = Token.load(event.params._id.toString());
+// //     // token.
+// // }
+
+// // export function handleMinted(event: MintedEvent): void {
+// //   let token = new Token(event.params._id.toString());
+// //   token.owner = event.params._owner
+// //   token.tokenId = event.params._id
+// //   token.save()
+// // }
+
+// export function handleTransfer(event: TransferEvent): void {
+// 	let token = Token.load(event.params.tokenId.toString());
+// 	if (!token) {
+// 		token = new Token(event.params.tokenId.toString());
+// 		token.tokenId = event.params.tokenId;
+// 	}
+// 	token.owner = event.params.to;
+// 	if (event.params.from != Address.zero()) {
+// 		let from = Owner.load(event.params.from.toHex());
+// 		if (from == null) {
+// 			from = new Owner(event.params.from.toHex());
+// 			from.save();
+// 		}
+// 	}
+// 	if (event.params.to != Address.zero()) {
+// 		let to = Owner.load(event.params.to.toHex());
+// 		if (to == null) {
+// 			to = new Owner(event.params.to.toHex());
+// 			to.save();
+// 		}
+// 	}
+// 	// entity.to = event.params.to
+// 	// entity.tokenId = event.params.tokenId
+// 	token.save();
+// }
+
+import { log, BigInt } from '@graphprotocol/graph-ts';
+import {
+	CollectibleErc721,
+	Transfer as TransferEvent,
+} from '../generated/templates/CollectibleErc721/CollectibleErc721';
+import { Token, Owner, Contract, Transfer } from '../generated/schema';
+
+export function handleTransfer(event: TransferEvent): void {
+	log.debug('Transfer detected. From: {} | To: {} | TokenID: {}', [
+		event.params.from.toHexString(),
+		event.params.to.toHexString(),
+		event.params.tokenId.toHexString(),
+	]);
+
+	let previousOwner = Owner.load(event.params.from.toHexString());
+	let newOwner = Owner.load(event.params.to.toHexString());
+	let token = Token.load(event.params.tokenId.toHexString());
+	let transferId = event.transaction.hash
+		.toHexString()
+		.concat(':'.concat(event.transactionLogIndex.toHexString()));
+	let transfer = Transfer.load(transferId);
+	let contract = Contract.load(event.address.toHexString());
+	let instance = CollectibleErc721.bind(event.address);
+
+	if (previousOwner == null) {
+		previousOwner = new Owner(event.params.from.toHexString());
+
+		previousOwner.balance = BigInt.fromI32(0);
+	} else {
+		let prevBalance = previousOwner.balance;
+		if (prevBalance! > BigInt.fromI32(0)) {
+			previousOwner.balance = prevBalance!.minus(BigInt.fromI32(1));
+		}
+	}
+
+	if (newOwner == null) {
+		newOwner = new Owner(event.params.to.toHexString());
+		newOwner.balance = BigInt.fromI32(1);
+	} else {
+		let prevBalance = newOwner.balance;
+		newOwner.balance = prevBalance!.plus(BigInt.fromI32(1));
+	}
+
+	if (token == null) {
+		token = new Token(event.params.tokenId.toHexString());
+		token.contract = event.address.toHexString();
+
+		let uri = instance.try_tokenURI(event.params.tokenId);
+		if (!uri.reverted) {
+			token.uri = uri.value;
+		}
+	}
+
+	token.owner = event.params.to.toHexString();
+
+	if (transfer == null) {
+		transfer = new Transfer(transferId);
+		transfer.token = event.params.tokenId.toHexString();
+		transfer.from = event.params.from.toHexString();
+		transfer.to = event.params.to.toHexString();
+		transfer.timestamp = event.block.timestamp;
+		transfer.block = event.block.number;
+		transfer.transactionHash = event.transaction.hash.toHexString();
+	}
+
+	if (contract == null) {
+		contract = new Contract(event.address.toHexString());
+		// return;
+	}
+
+	let name = instance.try_name();
+	if (!name.reverted) {
+		contract.name = name.value;
+	}
+
+	let symbol = instance.try_symbol();
+	if (!symbol.reverted) {
+		contract.symbol = symbol.value;
+	}
+
+	// let totalSupply = instance.try_totalSupply();
+	// if (!totalSupply.reverted) {
+	// 	contract.totalSupply = totalSupply.value;
+	// }
+
+	previousOwner.save();
+	newOwner.save();
+	token.save();
+	contract.save();
+	transfer.save();
+}

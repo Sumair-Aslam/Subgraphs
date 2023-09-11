@@ -1,0 +1,34 @@
+{
+  tokens(first: 5) {
+    id
+    contract {
+      id
+    }
+    tokenID
+    owners {
+      id
+    }
+  }
+  ownerTokenLookups(first: 5) {
+    id
+    owner {
+      id
+    }
+    token {
+      id
+    }
+    contract {
+      id
+    }
+    quantity
+  }
+   owners{
+    id
+    tokens{
+      id
+      token{
+      tokenID}
+      quantity
+    }
+  }
+}

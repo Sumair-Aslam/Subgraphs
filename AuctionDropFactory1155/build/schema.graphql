@@ -1,0 +1,21 @@
+type AuctionDrop @entity {
+	id: ID!
+	cloneId: Bytes # bytes 32
+	cloneAddress: Bytes # address
+	caller: Bytes # address
+}
+
+type Bid @entity {
+	id: ID!
+	_dropId: Bytes #bytes 32
+	_bidId: Bytes # bytes 32
+	_tokenId: BigInt # uint256
+	_bidValue: BigInt # uint256
+	_nftAddress: Bytes # address
+	eventType: BidEvent
+}
+
+enum BidEvent {
+	BidSubmitted
+	BidAccepted
+}

@@ -1,0 +1,30 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Contract
+    network: goerli
+    source:
+      address: '0xbC2b66a0FDb4d24D48e5c0dB2934A6d30201eCd0'
+      abi: Contract
+      startBlock: 7875954
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - DropCreated
+        - OrderExecuted
+        - OrderCancelled
+      abis:
+        - name: Contract
+          file: ./abis/Contract.json
+      eventHandlers:
+        - event: DropCreated(indexed bytes32,indexed address,indexed address)
+          handler: handleDropCreated
+        - event: OrderExecuted(bytes32,address,uint256,uint256)
+          handler: handleOrderExecuted
+        - event: OrderCancelled(bytes32,address,uint256)
+          handler: handleOrderCancelled
+      file: ./src/contract.ts

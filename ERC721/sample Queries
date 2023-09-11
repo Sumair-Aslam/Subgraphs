@@ -1,0 +1,35 @@
+{
+  tokens(first: 5) {
+    id
+    owner {
+      id
+    }
+    uri
+    transfers {
+      id
+    }
+  }
+  owners(first: 5) {
+    id
+    ownedTokens {
+      id
+    }
+    balance
+  }
+  
+   contracts {
+    id
+    name
+    symbol
+    mintedTokens{
+       id
+    owner {
+      id
+    }
+    uri
+    transfers {
+      id
+    }
+    }
+  }
+}
